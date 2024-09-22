@@ -6,7 +6,15 @@ const jwt = require("jsonwebtoken");
 
 const createUserService = async (name, email, password) => {
     try {
-        const hashPassword = await bcrypt.hash(password, saltRounds)
+        // check user exist
+        const user = await User.findOne({email});
+        if (user) {
+            console.log(`user exist, chọn 1 email khác: ${email}`);
+            return null;
+        }
+        // hash user password
+        const hashPassword = await bcrypt.hash(password, saltRounds);
+        // save user to database
         let result = await User.create({
             name: name,
             email: email,
@@ -47,6 +55,7 @@ const loginService = async (email, password) => {
                     }
                 );
                 return {
+                    EC: 0,
                     access_token,
                     user: {
                         email: user.email,
@@ -66,6 +75,18 @@ const loginService = async (email, password) => {
     }
 }
 
+const getUserService = async () => {
+    try {
+        let result = await User.find({});
+        return result;
+
+    } catch (error) {
+        console.log(error);
+        return null;
+    }
+}
+
+
 module.exports = {
-    createUserService, loginService
+    createUserService, loginService, getUserService
 }
